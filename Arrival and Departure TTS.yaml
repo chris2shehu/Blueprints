@@ -1,0 +1,74 @@
+blueprint:
+  name: Arrival & Departure Announcements Google TTS
+  description: Use Google TTS to announce when a person arrives or departed from a zone
+  domain: automation
+
+  input:
+#person
+    person_select:
+      name: Person
+      description: "Person to trigger TTS on"
+      selector:
+        entity:
+          domain: person
+#zone
+    zone_select:
+      name: Zone
+      description: "Zone to trigger TTS on"
+      selector:
+        entity:
+          domain: zone
+#Speaker selector
+    media_player:
+      name: Device(s) to speak thru
+      description: This uses google_translate to send a text message
+      selector:
+        entity:
+          domain: media_player
+#message arrival
+    arrival_message:
+      name: Arrival Message
+      description: "Type your arrival message here:"
+      default: {}
+      selector:
+        text:
+          multiline: true
+#message departure
+    departure_message:
+      name: Departure Message
+      description: "Type your departure message here:"
+      default: {}
+      selector:
+        text:
+          multiline: true
+#Automation Code
+trigger:
+  - platform: zone
+    entity_id: !input person_select
+    zone: !input zone_select
+    event: enter
+  - platform: zone
+    entity_id: !input person_select
+    zone: !input zone_select
+    event: leave
+condition: []
+action:
+  - choose:
+      - conditions:
+          - condition: zone
+            entity_id: !input person_select
+            zone: !input zone_select
+        sequence:
+          - service: tts.google_translate_say
+            data:
+              entity_id: !input media_player
+              message: !input arrival_message
+      - conditions: {{ departure_message }}
+        sequence:
+          - service: tts.google_translate_say
+            data:
+              entity_id: !input media_player
+                message: !input departure_message
+    default: []
+mode: queued
+max: 10
