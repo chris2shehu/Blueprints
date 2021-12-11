@@ -37,7 +37,7 @@ blueprint:
     departure_message:
       name: Departure Message
       description: "Type your departure message here:"
-      default: ""
+      default:
       selector:
         text:
           multiline: true
@@ -63,12 +63,18 @@ action:
             data:
               entity_id: !input media_player
               message: !input arrival_message
-      - conditions: []
-        sequence: []
-    default:
-      - service: tts.google_translate_say
-        data:
-          entity_id: !input media_player
-          message: !input departure_message
+      - conditions:
+          - condition: not
+            conditions:
+              - condition: zone
+                entity_id: !input person_select
+                zone: !input zone_select
+        sequence:
+          - service: tts.google_translate_say
+            data:
+              entity_id: media_player.kitchen
+              message: !input departure_message
+    default: []
+    default: []
 mode: queued
 max: 10
