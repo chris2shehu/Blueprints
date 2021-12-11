@@ -1,7 +1,6 @@
 blueprint:
   name: Arrival & Departure Announcements Google TTS
   description: Use Google TTS to announce when a person arrives or departed from a zone
-  source_url: https://github.com/TekHawk/Blueprints/blob/4643f69613cddcd78f9778e5a6a7d3fe27ef2175/Arrival%20and%20Departure%20TTS.yaml
   domain: automation
 
   input:
@@ -30,7 +29,7 @@ blueprint:
     arrival_message:
       name: Arrival Message
       description: "Type your arrival message here:"
-      default: {}
+      default: Welcome Home
       selector:
         text:
           multiline: true
@@ -38,7 +37,7 @@ blueprint:
     departure_message:
       name: Departure Message
       description: "Type your departure message here:"
-      default: {}
+      default: ""
       selector:
         text:
           multiline: true
@@ -64,13 +63,12 @@ action:
             data:
               entity_id: !input media_player
               message: !input arrival_message
-      - conditions:
-        - condition: !input departure_message
-          sequence:
-            - service: tts.google_translate_say
-              data:
-                entity_id: !input media_player
-                message: !input departure_message
-    default: []
+      - conditions: []
+        sequence: []
+    default:
+      - service: tts.google_translate_say
+        data:
+          entity_id: !input media_player
+          message: !input departure_message
 mode: queued
 max: 10
