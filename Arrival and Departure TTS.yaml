@@ -64,11 +64,12 @@ action:
             data:
               entity_id: !input media_player
               message: !input arrival_message
-      - conditions: !input departure_message !== ""
-        sequence:
-          - service: tts.google_translate_say
-            data:
-              entity_id: !input media_player
+      - conditions:
+        - condition: !input departure_message
+          sequence:
+            - service: tts.google_translate_say
+              data:
+                entity_id: !input media_player
                 message: !input departure_message
     default: []
 mode: queued
