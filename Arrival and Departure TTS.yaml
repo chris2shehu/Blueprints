@@ -1,6 +1,7 @@
 blueprint:
   name: Arrival & Departure Announcements Google TTS
   description: Use Google TTS to announce when a person arrives or departed from a zone
+  source_url: https://github.com/TekHawk/Blueprints/blob/main/Arrival%20and%20Departure%20TTS.yaml
   domain: automation
 
   input:
