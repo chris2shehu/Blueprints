@@ -5,13 +5,14 @@ blueprint:
   domain: automation
 
   input:
-    # Person
+    # Persons
     person_select:
-      name: Person
-      description: "Person to trigger TTS on"
+      name: Person(s)
+      description: "Persons to trigger TTS on"
       selector:
-        entity:
-          domain: person
+        target:
+          entity:
+            domain: person
     # Zone
     zone_select:
       name: Zone
@@ -19,13 +20,14 @@ blueprint:
       selector:
         entity:
           domain: zone
-    # Speaker selector
+    # Speakers
     media_player:
       name: Device(s) to speak through
       description: "This uses cloud TTS to send a text message"
       selector:
-        entity:
-          domain: media_player
+        target:
+          entity:
+            domain: media_player
     # Message arrival
     arrival_message:
       name: Arrival Message
@@ -65,7 +67,7 @@ action:
           - service: tts.cloud_say
             data:
               cache: false
-              entity_id: !input media_player
+              target: !input media_player
               message: !input arrival_message
       - conditions:
           - condition: not
@@ -77,7 +79,7 @@ action:
           - service: tts.cloud_say
             data:
               cache: false
-              entity_id: !input media_player
+              target: !input media_player
               message: !input departure_message
 
 mode: queued
