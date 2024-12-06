@@ -31,16 +31,16 @@ blueprint:
     # Message arrival
     arrival_message:
       name: Arrival Message
-      description: "Type your arrival message here:"
-      default: Welcome Home
+      description: "Type your arrival message here. Use {name} to insert the person's name."
+      default: "{name} has arrived at the zone!"
       selector:
         text:
           multiline: true
     # Message departure
     departure_message:
       name: Departure Message
-      description: "Type your departure message here:"
-      default: Goodbye
+      description: "Type your departure message here. Use {name} to insert the person's name."
+      default: "{name} has left the zone."
       selector:
         text:
           multiline: true
@@ -68,7 +68,8 @@ action:
             data:
               cache: false
               target: !input media_player
-              message: !input arrival_message
+              message: >
+                {{ !input.arrival_message.replace('{name}', state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id) }}
       - conditions:
           - condition: not
             conditions:
@@ -80,7 +81,8 @@ action:
             data:
               cache: false
               target: !input media_player
-              message: !input departure_message
+              message: >
+                {{ !input.departure_message.replace('{name}', state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id) }}
 
 mode: queued
 max: 10
