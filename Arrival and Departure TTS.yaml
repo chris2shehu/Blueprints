@@ -50,20 +50,19 @@ blueprint:
 
 trigger:
   - platform: zone
-    entity_id: !input person_select
-    zone: !input zone_select
+    entity_id: "{{ person_select.entity_id }}"
+    zone: "{{ zone_select }}"
     event: enter
   - platform: zone
-    entity_id: !input person_select
-    zone: !input zone_select
+    entity_id: "{{ person_select.entity_id }}"
+    zone: "{{ zone_select }}"
     event: leave
 
 condition: []
 
 action:
   - variables:
-      entity_name: >
-        {{ state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id }}
+      entity_name: "{{ state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id }}"
   - choose:
       - conditions:
           - condition: template
@@ -73,7 +72,7 @@ action:
             target: !input media_player
             data:
               cache: false
-              message: "{{ !input arrival_message | replace('{name}', entity_name) }}"
+              message: "{{ arrival_message | replace('{name}', entity_name) }}"
       - conditions:
           - condition: template
             value_template: "{{ trigger.event == 'leave' }}"
@@ -82,7 +81,7 @@ action:
             target: !input media_player
             data:
               cache: false
-              message: "{{ !input departure_message | replace('{name}', entity_name) }}"
+              message: "{{ departure_message | replace('{name}', entity_name) }}"
 
 mode: queued
 max: 10
