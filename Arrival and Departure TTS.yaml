@@ -60,7 +60,7 @@ action:
             entity_id: !input person_select
             zone: !input zone_select
         sequence:
-          - service: tts.google_translate_say
+          - service: tts.google_en_com
             data:
               entity_id: !input media_player
               message: !input arrival_message
@@ -71,7 +71,7 @@ action:
                 entity_id: !input person_select
                 zone: !input zone_select
         sequence:
-          - service: tts.google_translate_say
+          - service: tts.google_en_com
             data:
               entity_id: media_player.kitchen
               message: !input departure_message
