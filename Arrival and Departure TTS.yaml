@@ -3,59 +3,59 @@ blueprint:
   description: Use Google TTS to announce when a person arrives or departs from a zone
   domain: automation
 
-  input:
-    # Persons
-    person_select:
-      name: Person(s)
-      description: "Persons to trigger TTS on"
-      selector:
-        target:
-          entity:
-            domain: person
-
-    # Zone
-    zone_select:
-      name: Zone
-      description: "Zone to trigger TTS on"
-      selector:
+input:
+  # Persons
+  person_select:
+    name: Person(s)
+    description: "Persons to trigger TTS on"
+    selector:
+      target:
         entity:
-          domain: zone
+          domain: person
 
-    # Speakers
-    media_player:
-      name: Device(s) to speak through
-      description: "This uses cloud TTS to send a text message"
-      selector:
-        target:
-          entity:
-            domain: media_player
+  # Zone
+  zone_select:
+    name: Zone
+    description: "Zone to trigger TTS on"
+    selector:
+      entity:
+        domain: zone
 
-    # Message arrival
-    arrival_message:
-      name: Arrival Message
-      description: "Type your arrival message here. Use {name} to insert the person's name."
-      default: "{name} has arrived at the zone!"
-      selector:
-        text:
-          multiline: true
+  # Speakers
+  media_player:
+    name: Device(s) to speak through
+    description: "This uses cloud TTS to send a text message"
+    selector:
+      target:
+        entity:
+          domain: media_player
 
-    # Message departure
-    departure_message:
-      name: Departure Message
-      description: "Type your departure message here. Use {name} to insert the person's name."
-      default: "{name} has left the zone."
-      selector:
-        text:
-          multiline: true
+  # Message arrival
+  arrival_message:
+    name: Arrival Message
+    description: "Type your arrival message here. Use {name} to insert the person's name."
+    default: "{name} has arrived at the zone!"
+    selector:
+      text:
+        multiline: true
+
+  # Message departure
+  departure_message:
+    name: Departure Message
+    description: "Type your departure message here. Use {name} to insert the person's name."
+    default: "{name} has left the zone."
+    selector:
+      text:
+        multiline: true
 
 trigger:
   - platform: zone
-    entity_id: "{{ person_select.entity_id }}"
-    zone: "{{ zone_select }}"
+    entity_id: !input person_select
+    zone: !input zone_select
     event: enter
   - platform: zone
-    entity_id: "{{ person_select.entity_id }}"
-    zone: "{{ zone_select }}"
+    entity_id: !input person_select
+    zone: !input zone_select
     event: leave
 
 condition: []
@@ -63,6 +63,8 @@ condition: []
 action:
   - variables:
       entity_name: "{{ state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id }}"
+      arrival_msg: !input arrival_message
+      departure_msg: !input departure_message
   - choose:
       - conditions:
           - condition: template
@@ -72,7 +74,7 @@ action:
             target: !input media_player
             data:
               cache: false
-              message: "{{ arrival_message | replace('{name}', entity_name) }}"
+              message: "{{ arrival_msg | replace('{name}', entity_name) }}"
       - conditions:
           - condition: template
             value_template: "{{ trigger.event == 'leave' }}"
@@ -81,7 +83,7 @@ action:
             target: !input media_player
             data:
               cache: false
-              message: "{{ departure_message | replace('{name}', entity_name) }}"
+              message: "{{ departure_msg | replace('{name}', entity_name) }}"
 
 mode: queued
 max: 10
