@@ -12,6 +12,7 @@ blueprint:
         target:
           entity:
             domain: person
+
     # Zone
     zone_select:
       name: Zone
@@ -19,6 +20,7 @@ blueprint:
       selector:
         entity:
           domain: zone
+
     # Speakers
     media_player:
       name: Device(s) to speak through
@@ -27,6 +29,7 @@ blueprint:
         target:
           entity:
             domain: media_player
+
     # Message arrival
     arrival_message:
       name: Arrival Message
@@ -35,6 +38,7 @@ blueprint:
       selector:
         text:
           multiline: true
+
     # Message departure
     departure_message:
       name: Departure Message
@@ -63,26 +67,22 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger.event == 'enter' }}
+            value_template: "{{ trigger.event == 'enter' }}"
         sequence:
           - service: tts.cloud_say
+            target: !input media_player
             data:
               cache: false
-              target: !input media_player
-              message: >
-                {{ (!input.arrival_message).replace('{name}', entity_name) }}
+              message: "{{ !input arrival_message | replace('{name}', entity_name) }}"
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger.event == 'leave' }}
+            value_template: "{{ trigger.event == 'leave' }}"
         sequence:
           - service: tts.cloud_say
+            target: !input media_player
             data:
               cache: false
-              target: !input media_player
-              message: >
-                {{ (!input.departure_message).replace('{name}', entity_name) }}
+              message: "{{ !input departure_message | replace('{name}', entity_name) }}"
 
 mode: queued
 max: 10
