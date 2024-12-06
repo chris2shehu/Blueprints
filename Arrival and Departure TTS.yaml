@@ -1,32 +1,32 @@
 blueprint:
   name: Arrival & Departure Announcements Google TTS
-  description: Use Google TTS to announce when a person arrives or departed from a zone
+  description: Use Google TTS to announce when a person arrives or departs from a zone
   source_url: https://github.com/TekHawk/Blueprints/blob/b1c8594d5c24e48cf05e583e74d23f5cabc85c90/Arrival%20and%20Departure%20TTS.yaml
   domain: automation
 
   input:
-#person
+    # Person
     person_select:
       name: Person
       description: "Person to trigger TTS on"
       selector:
         entity:
           domain: person
-#zone
+    # Zone
     zone_select:
       name: Zone
       description: "Zone to trigger TTS on"
       selector:
         entity:
           domain: zone
-#Speaker selector
+    # Speaker selector
     media_player:
-      name: Device(s) to speak thru
-      description: This uses google_translate to send a text message
+      name: Device(s) to speak through
+      description: "This uses cloud TTS to send a text message"
       selector:
         entity:
           domain: media_player
-#message arrival
+    # Message arrival
     arrival_message:
       name: Arrival Message
       description: "Type your arrival message here:"
@@ -34,15 +34,15 @@ blueprint:
       selector:
         text:
           multiline: true
-#message departure
+    # Message departure
     departure_message:
       name: Departure Message
       description: "Type your departure message here:"
-      default:
+      default: Goodbye
       selector:
         text:
           multiline: true
-#Automation Code
+
 trigger:
   - platform: zone
     entity_id: !input person_select
@@ -52,7 +52,9 @@ trigger:
     entity_id: !input person_select
     zone: !input zone_select
     event: leave
+
 condition: []
+
 action:
   - choose:
       - conditions:
@@ -60,8 +62,9 @@ action:
             entity_id: !input person_select
             zone: !input zone_select
         sequence:
-          - service: tts.google_en_com
+          - service: tts.cloud_say
             data:
+              cache: false
               entity_id: !input media_player
               message: !input arrival_message
       - conditions:
@@ -71,11 +74,11 @@ action:
                 entity_id: !input person_select
                 zone: !input zone_select
         sequence:
-          - service: tts.google_en_com
+          - service: tts.cloud_say
             data:
-              entity_id: media_player.kitchen
+              cache: false
+              entity_id: !input media_player
               message: !input departure_message
-    default: []
-    default: []
+
 mode: queued
 max: 10
