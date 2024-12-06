@@ -1,59 +1,56 @@
 blueprint:
   name: Arrival & Departure Announcements Google TTS
   description: Use Google TTS to announce when a person arrives or departs from a zone
+  source_url: https://github.com/TekHawk/Blueprints/blob/b1c8594d5c24e48cf05e583e74d23f5cabc85c90/Arrival%20and%20Departure%20TTS.yaml
   domain: automation
 
-input:
-  # Person (Single Selection)
-  person:
-    name: Person
-    description: "Person to trigger TTS on"
-    selector:
-      entity:
-        domain: person
-
-  # Zone
-  zone:
-    name: Zone
-    description: "Zone to trigger TTS on"
-    selector:
-      entity:
-        domain: zone
-
-  # Media Player (Single Selection)
-  media_player:
-    name: Media Player
-    description: "Device to speak through"
-    selector:
-      entity:
-        domain: media_player
-
-  # Arrival Message
-  arrival_message:
-    name: Arrival Message
-    description: "Type your arrival message here. Use {name} to insert the person's name."
-    default: "{name} has arrived at the zone!"
-    selector:
-      text:
-        multiline: true
-
-  # Departure Message
-  departure_message:
-    name: Departure Message
-    description: "Type your departure message here. Use {name} to insert the person's name."
-    default: "{name} has left the zone."
-    selector:
-      text:
-        multiline: true
+  input:
+    # Person
+    person_select:
+      name: Person
+      description: "Person to trigger TTS on"
+      selector:
+        entity:
+          domain: person
+    # Zone
+    zone_select:
+      name: Zone
+      description: "Zone to trigger TTS on"
+      selector:
+        entity:
+          domain: zone
+    # Speaker selector
+    media_player:
+      name: Device(s) to speak through
+      description: "This uses cloud TTS to send a text message"
+      selector:
+        entity:
+          domain: media_player
+    # Message arrival
+    arrival_message:
+      name: Arrival Message
+      description: "Type your arrival message here:"
+      default: Welcome Home
+      selector:
+        text:
+          multiline: true
+    # Message departure
+    departure_message:
+      name: Departure Message
+      description: "Type your departure message here:"
+      default: Goodbye
+      selector:
+        text:
+          multiline: true
 
 trigger:
   - platform: zone
-    entity_id: !input person
-    zone: !input zone
+    entity_id: !input person_select
+    zone: !input zone_select
     event: enter
   - platform: zone
-    entity_id: !input person
-    zone: !input zone
+    entity_id: !input person_select
+    zone: !input zone_select
     event: leave
 
 condition: []
@@ -61,25 +58,27 @@ condition: []
 action:
   - choose:
       - conditions:
-          - condition: template
-            value_template: "{{ trigger.event == 'enter' }}"
+          - condition: zone
+            entity_id: !input person_select
+            zone: !input zone_select
         sequence:
           - service: tts.cloud_say
-            target:
-              entity_id: !input media_player
             data:
               cache: false
-              message: "{{ arrival_message | replace('{name}', state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id) }}"
+              entity_id: !input media_player
+              message: !input arrival_message
       - conditions:
-          - condition: template
-            value_template: "{{ trigger.event == 'leave' }}"
+          - condition: not
+            conditions:
+              - condition: zone
+                entity_id: !input person_select
+                zone: !input zone_select
         sequence:
           - service: tts.cloud_say
-            target:
-              entity_id: !input media_player
             data:
               cache: false
-              message: "{{ departure_message | replace('{name}', state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id) }}"
+              entity_id: !input media_player
+              message: !input departure_message
 
 mode: queued
 max: 10
