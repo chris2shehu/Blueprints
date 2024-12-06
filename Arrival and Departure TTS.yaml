@@ -4,33 +4,31 @@ blueprint:
   domain: automation
 
 input:
-  # Persons
-  person_select:
-    name: Person(s)
-    description: "Persons to trigger TTS on"
+  # Person (Single Selection)
+  person:
+    name: Person
+    description: "Person to trigger TTS on"
     selector:
-      target:
-        entity:
-          domain: person
+      entity:
+        domain: person
 
   # Zone
-  zone_select:
+  zone:
     name: Zone
     description: "Zone to trigger TTS on"
     selector:
       entity:
         domain: zone
 
-  # Speakers
+  # Media Player (Single Selection)
   media_player:
-    name: Device(s) to speak through
-    description: "This uses cloud TTS to send a text message"
+    name: Media Player
+    description: "Device to speak through"
     selector:
-      target:
-        entity:
-          domain: media_player
+      entity:
+        domain: media_player
 
-  # Message arrival
+  # Arrival Message
   arrival_message:
     name: Arrival Message
     description: "Type your arrival message here. Use {name} to insert the person's name."
@@ -39,7 +37,7 @@ input:
       text:
         multiline: true
 
-  # Message departure
+  # Departure Message
   departure_message:
     name: Departure Message
     description: "Type your departure message here. Use {name} to insert the person's name."
@@ -50,40 +48,38 @@ input:
 
 trigger:
   - platform: zone
-    entity_id: !input person_select
-    zone: !input zone_select
+    entity_id: !input person
+    zone: !input zone
     event: enter
   - platform: zone
-    entity_id: !input person_select
-    zone: !input zone_select
+    entity_id: !input person
+    zone: !input zone
     event: leave
 
 condition: []
 
 action:
-  - variables:
-      entity_name: "{{ state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id }}"
-      arrival_msg: !input arrival_message
-      departure_msg: !input departure_message
   - choose:
       - conditions:
           - condition: template
             value_template: "{{ trigger.event == 'enter' }}"
         sequence:
           - service: tts.cloud_say
-            target: !input media_player
+            target:
+              entity_id: !input media_player
             data:
               cache: false
-              message: "{{ arrival_msg | replace('{name}', entity_name) }}"
+              message: "{{ arrival_message | replace('{name}', state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id) }}"
       - conditions:
           - condition: template
             value_template: "{{ trigger.event == 'leave' }}"
         sequence:
           - service: tts.cloud_say
-            target: !input media_player
+            target:
+              entity_id: !input media_player
             data:
               cache: false
-              message: "{{ departure_msg | replace('{name}', entity_name) }}"
+              message: "{{ departure_message | replace('{name}', state_attr(trigger.entity_id, 'friendly_name') or trigger.entity_id) }}"
 
 mode: queued
 max: 10
